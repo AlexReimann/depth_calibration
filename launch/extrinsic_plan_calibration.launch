@@ -1,0 +1,14 @@
+
+<launch>
+    <arg name="cloud_topic"                     default="/gopher/sensor_3d/depth/points"/>
+    <arg name="plane_coefficients_topic"        value="sensor_3d/depth/calibration/plane"/>
+
+    <node pkg="depth_calibration" type="center_plane_extractor" name="center_plane_extractor" output="screen">   
+        <remap from="cloud"                     to="$(arg cloud_topic)"/>
+        <remap from="plane_coefficients"        to="$(arg plane_coefficients_topic)"/>
+    </node>
+    
+    <node pkg="depth_calibration" type="extrinsic_plane_calibration.py" name="extrinsic_plane_calibration" output="screen">
+        <remap from="plane_coefficients"        to="$(arg plane_coefficients_topic)"/>
+    </node>
+</launch>

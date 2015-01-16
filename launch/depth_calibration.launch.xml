@@ -9,17 +9,24 @@
     <arg name="camera_info_relay_topic"         value="sensor_3d/depth/calibration/camera_info"/>
     <arg name="depth_relay_topic"               value="sensor_3d/depth/calibration/depth_relay"/>
     <arg name="save_calibration_trigger_topic"  value="sensor_3d/depth/calibration/save_calibration"/>
+    
+    <arg name="plane_coefficients_topic"        value="sensor_3d/depth/calibration/plane"/>
 
     <node pkg="nodelet" type="nodelet" name="cloudify_manager" args="manager"/>	
     <node pkg="nodelet" type="nodelet" name="cloudify_calibration" args="load depth_image_proc/point_cloud_xyz cloudify_manager">
         <remap from="image_rect"    to="$(arg calibrated_depth_topic)"/>
         <remap from="points"        to="$(arg calibrated_cloud_topic)"/>
-    </node>
+    </node>    
 
+    <node pkg="depth_calibration" type="center_plane_extractor" name="center_plane_extractor" output="screen">   
+        <remap from="cloud"                     to="$(arg calibrated_cloud_topic)"/>
+        <remap from="plane_coefficients"        to="$(arg plane_coefficients_topic)"/>
+    </node>
 
     <node pkg="depth_calibration" type="depth_calibrator" name="depth_calibrator" output="screen">
         <remap from="camera_info_relay"         to="$(arg camera_info_relay_topic)"/>
         <remap from="depth_relay"               to="$(arg depth_relay_topic)"/>
+        <remap from="plane_coefficients"        to="$(arg plane_coefficients_topic)"/>
         
         <remap from="calibrated_depth"          to="$(arg calibrated_depth_topic)"/>
         <remap from="calibrated_cloud"          to="$(arg calibrated_cloud_topic)"/>

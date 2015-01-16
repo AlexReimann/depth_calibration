@@ -7,14 +7,9 @@
 #include <sensor_msgs/Image.h>
 #include <sensor_msgs/CameraInfo.h>
 #include <image_geometry/pinhole_camera_model.h>
+#include <std_msgs/Float32MultiArray.h>
 #include <std_msgs/Float64MultiArray.h>
 #include <std_msgs/Empty.h>
-
-#include <pcl/io/pcd_io.h>
-#include <pcl_conversions/pcl_conversions.h>
-#include <pcl/common/common.h>
-#include <pcl/filters/passthrough.h>
-#include <pcl/segmentation/sac_segmentation.h>
 
 image_geometry::PinholeCameraModel camera_model_;
 cv::Mat depth_multiplier_correction_;
@@ -68,82 +63,13 @@ void depth_image_cb(const sensor_msgs::ImageConstPtr& image_msg)
   }
 }
 
-pcl::PointCloud<pcl::PointXYZ>::Ptr center_extraction(pcl::PCLPointCloud2Ptr cloudPtr)
-{
-  pcl::PointCloud<pcl::PointXYZ>::Ptr input_cloud(new pcl::PointCloud<pcl::PointXYZ>);
-  pcl::fromPCLPointCloud2(*cloudPtr, *input_cloud);
-
-  pcl::PointCloud<pcl::PointXYZ>::Ptr temp_cloud(new pcl::PointCloud<pcl::PointXYZ>);
-  pcl::PointCloud<pcl::PointXYZ>::Ptr center_cloud(new pcl::PointCloud<pcl::PointXYZ>);
-
-  pcl::PointXYZ min;
-  pcl::PointXYZ max;
-  pcl::getMinMax3D(*input_cloud, min, max);
-
-  double center_radius_x = (max.x - min.x) * 0.5 * 0.3; //30%
-  double center_radius_y = (max.y - min.y) * 0.5 * 0.3; //30%
-
-  pcl::PassThrough<pcl::PointXYZ> pass;
-  pass.setInputCloud(input_cloud);
-  pass.setFilterFieldName("x");
-  pass.setFilterLimits(-center_radius_x, center_radius_x);
-  pass.filter(*temp_cloud);
-
-  pass.setInputCloud(temp_cloud);
-  pass.setFilterFieldName("y");
-  pass.setFilterLimits(-center_radius_y, center_radius_y);
-  pass.filter(*center_cloud);
-
-  return center_cloud;
-}
-
-boost::shared_ptr<pcl::ModelCoefficients> getPlane(pcl::PointCloud<pcl::PointXYZ>::Ptr temp_cloud)
-{
-  boost::shared_ptr<pcl::ModelCoefficients> plane_coefficients(new pcl::ModelCoefficients);
-  pcl::PointIndices temp_indicies;
-
-  pcl::SACSegmentation<pcl::PointXYZ> segmentation;
-  // Optional
-  segmentation.setOptimizeCoefficients(true);
-  // Mandatory
-  segmentation.setModelType(pcl::SACMODEL_PLANE);
-  segmentation.setMethodType(pcl::SAC_RANSAC);
-  segmentation.setDistanceThreshold(0.0005); //we gotta catch'em all, so set that low
-  segmentation.setMaxIterations(1000); //wanna be the very best, so set that high
-
-  segmentation.setInputCloud(temp_cloud);
-  segmentation.segment(temp_indicies, *plane_coefficients);
-
-  return plane_coefficients;
-}
-
-void update_plane_coeff(const sensor_msgs::PointCloud2ConstPtr& cloud_msg) //boost::shared_ptr<pcl::PCLPointCloud2> cloudPtr)
+void update_plane_coeff(const std_msgs::Float32MultiArrayConstPtr& plane_coeffcients)
 {
   if (!depth_updated_ || calibration_finished_)
     return;
 
-  boost::shared_ptr<pcl::PCLPointCloud2> cloud(new pcl::PCLPointCloud2);
-  pcl::PCLPointCloud2Ptr cloudPtr(cloud);
-  pcl_conversions::toPCL(*cloud_msg, *cloud);
-
-  pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_center = center_extraction(cloudPtr);
-
-  if (cloud_center->width * cloud_center->height == 0)
-  {
-    ROS_ERROR_THROTTLE(1.0, "Depth calibration could not extract the center of the point cloud.");
-    return;
-  }
-
-  boost::shared_ptr<pcl::ModelCoefficients> plane_coefficients = getPlane(cloud_center);
-
-  if (plane_coefficients->values.size() == 0)
-  {
-    ROS_WARN("Plane was not found!");
-    return;
-  }
-
   coefficients_mutex_.lock();
-  plane_coefficients_ = plane_coefficients->values;
+  plane_coefficients_ = plane_coeffcients->data;
   coefficients_mutex_.unlock();
 }
 
@@ -299,7 +225,8 @@ int main(int argc, char** argv)
   ros::Subscriber sub_depth_camera_info = nh.subscribe<sensor_msgs::CameraInfo>("camera_info_relay", 1, camera_info_cb);
   ros::Subscriber sub_depth_image = nh.subscribe<sensor_msgs::Image>("depth_relay", 1, depth_image_cb);
   ros::Subscriber sub_calibration = nh.subscribe<sensor_msgs::Image>("calibrated_depth", 1, calibration_cb);
-  ros::Subscriber sub_cloud = nh.subscribe<sensor_msgs::PointCloud2>("calibrated_cloud", 1, update_plane_coeff);
+
+  ros::Subscriber sub_plane = nh.subscribe<std_msgs::Float32MultiArray>("plane_coefficients", 1, update_plane_coeff); ///
   ros::Subscriber sub_save = nh.subscribe<std_msgs::Empty>("save_calibration_trigger", 1, save_multiplier);
 
   int rate = 30;
