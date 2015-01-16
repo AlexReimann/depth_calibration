@@ -1,0 +1,7 @@
+
+<launch>
+    <include file="$(find depth_calibration)/launch/depth_calibration.launch.xml">
+        <arg name="camera_info_topic" value="/gopher/sensor_3d/depth/camera_info"/>
+        <arg name="depth_rect_raw_topic" value="/gopher/sensor_3d/depth/image_rect_raw"/>
+    </include>
+</launch>
