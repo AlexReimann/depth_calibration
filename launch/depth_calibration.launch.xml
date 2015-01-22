@@ -1,7 +1,7 @@
 
 <launch>
     <arg name="camera_info_topic"               default="camera/depth/camera_info"/>
-    <arg name="depth_rect_raw_topic"            default="camera/depth/image_rect_raw"/>
+    <arg name="depth_raw_topic"                 default="camera/depth/image_raw"/>
 
     <arg name="calibrated_depth_topic"          value="sensor_3d/depth/calibration/depth_calibrated"/>
     <arg name="calibrated_cloud_topic"          value="sensor_3d/depth/calibration/points"/>
@@ -14,9 +14,9 @@
 
     <node pkg="nodelet" type="nodelet" name="cloudify_manager" args="manager"/>	
     <node pkg="nodelet" type="nodelet" name="cloudify_calibration" args="load depth_image_proc/point_cloud_xyz cloudify_manager">
-        <remap from="image_rect"    to="$(arg calibrated_depth_topic)"/>
-        <remap from="points"        to="$(arg calibrated_cloud_topic)"/>
-    </node>    
+        <remap from="image_rect"                to="$(arg calibrated_depth_topic)"/>
+        <remap from="points"                    to="$(arg calibrated_cloud_topic)"/>
+    </node>
 
     <node pkg="depth_calibration" type="center_plane_extractor" name="center_plane_extractor" output="screen">   
         <remap from="cloud"                     to="$(arg calibrated_cloud_topic)"/>
@@ -39,7 +39,7 @@
         <remap from="save_calibration_trigger"  to="$(arg save_calibration_trigger_topic)"/>
         
         <remap from="camera_info"               to="$(arg camera_info_topic)"/>
-        <remap from="depth_rect_raw"            to="$(arg depth_rect_raw_topic)"/>
+        <remap from="depth_raw_distorted"       to="$(arg depth_raw_topic)"/>
         <remap from="calibrated_cloud"          to="$(arg calibrated_cloud_topic)"/>
     </node>
 </launch>

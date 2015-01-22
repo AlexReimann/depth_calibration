@@ -1,8 +1,13 @@
 
 <launch>
     <arg name="cloud_topic"                     default="/gopher/sensor_3d/depth/points"/>
+    
+    <arg name="base_footprint_frame"            default="base_footprint"/>
+    <arg name="depth_points_frame"              default="sensor_3d_rgb_optical_frame"/>
+    <arg name="test_publish_frame"              default="calibrated_depth_sensor_frame"/>
+    
     <arg name="plane_coefficients_topic"        value="sensor_3d/depth/calibration/plane"/>
-
+    
     <node pkg="depth_calibration" type="center_plane_extractor" name="center_plane_extractor" output="screen">   
         <remap from="cloud"                     to="$(arg cloud_topic)"/>
         <remap from="plane_coefficients"        to="$(arg plane_coefficients_topic)"/>

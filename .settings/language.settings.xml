@@ -51,6 +51,22 @@
 						<entry kind="macro" name="ROS_BUILD_SHARED_LIBS" value="1"/>
 						<entry kind="macro" name="ROS_PACKAGE_NAME" value="&quot;depth_calibration&quot;"/>
 					</resource>
+					<resource project-relative-path="src/depth_adjuster.cpp">
+						<entry kind="includePath" name="/${ProjName}/include">
+							<flag value="VALUE_WORKSPACE_PATH"/>
+						</entry>
+						<entry kind="includePath" name="/opt/ros/indigo/include"/>
+						<entry kind="includePath" name="/usr/include/eigen3"/>
+						<entry kind="includePath" name="/usr/include/pcl-1.7"/>
+						<entry kind="includePath" name="/usr/include/ni"/>
+						<entry kind="includePath" name="/usr/include/vtk-5.8"/>
+						<entry kind="includePath" name="/usr/include/opencv"/>
+						<entry kind="macro" name="NDEBUG" value=""/>
+						<entry kind="macro" name="ROSCONSOLE_BACKEND_LOG4CXX" value=""/>
+						<entry kind="macro" name="ROS_BUILD_SHARED_LIBS" value="1"/>
+						<entry kind="macro" name="ROS_PACKAGE_NAME" value="&quot;depth_calibration&quot;"/>
+						<entry kind="macro" name="depth_calibration_EXPORTS" value=""/>
+					</resource>
 				</language>
 			</provider>
 			<provider class="org.eclipse.cdt.managedbuilder.language.settings.providers.GCCBuiltinSpecsDetector" console="false" env-hash="-810292919" id="org.eclipse.cdt.managedbuilder.core.GCCBuiltinSpecsDetector" keep-relative-paths="false" name="CDT GCC Built-in Compiler Settings" parameter="${COMMAND} -E -P -v -dD -std=c++11 “${INPUTS}”" store-entries-with-project="true">

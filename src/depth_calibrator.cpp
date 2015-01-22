@@ -147,7 +147,7 @@ void calibration_cb(const sensor_msgs::ImageConstPtr& image_msg)
 {
   boost::mutex::scoped_lock multiplier_lock(multiplier_mutex_);
 
-  if(calibration_finished_)
+  if (calibration_finished_)
     return;
 
   cv_bridge::CvImagePtr cv_depth_image;

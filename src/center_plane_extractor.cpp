@@ -1,4 +1,3 @@
-
 #include <ros/ros.h>
 #include <sensor_msgs/PointCloud2.h>
 #include <std_msgs/Float32MultiArray.h>
@@ -10,7 +9,6 @@
 #include <pcl/segmentation/sac_segmentation.h>
 
 ros::Publisher pub_plane_coefficients_;
-
 
 pcl::PointCloud<pcl::PointXYZ>::Ptr center_extraction(pcl::PCLPointCloud2Ptr cloudPtr)
 {
@@ -101,7 +99,6 @@ void update_plane_coeff(const sensor_msgs::PointCloud2ConstPtr& cloud_msg) //boo
 
   publish_coefficients(plane_coefficients->values);
 }
-
 
 int main(int argc, char** argv)
 {

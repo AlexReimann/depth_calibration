@@ -1,0 +1,8 @@
+<library path="lib/libdepth_calibration">
+    
+    <class name="depth_calibration/depth_adjuster" type="depth_calibration::DepthAdjuster" base_class_type="nodelet::Nodelet">
+        <description>
+            Takes an raw depth image and output the calibrated version.
+        </description>
+    </class>
+</library>
