@@ -24,7 +24,8 @@ class ExtrinsicPlaneCalibration:
 
     def plane_cb(self, plane_coefficients):
         
-        camera_axis = (0, 1, 1)  # 45 degree tilted around x axis
+        camera_axis = (0.0, 1.0, 1.0)  # 45 degree tilted around x axis
+        camera_axis = camera_axis / np.linalg.norm(camera_axis)
         
         x = -plane_coefficients.data[0]
         y = -plane_coefficients.data[1]
@@ -32,10 +33,10 @@ class ExtrinsicPlaneCalibration:
         d = plane_coefficients.data[3]
                 
         if(z < 0):
-            z *= -1
-            y *= -1
-            x *= -1
-            d *= -1
+            z *= -1.0
+            y *= -1.0
+            x *= -1.0
+            d *= -1.0
         
         plane_normal = [x, y, z]
         

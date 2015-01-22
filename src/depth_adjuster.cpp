@@ -14,7 +14,14 @@ void DepthAdjuster::onInit()
                                                            this);
   pub_camera_info_relay_ = nh.advertise<sensor_msgs::CameraInfo>("output_camera_info_relay", 1);
 
-  load_calibration();
+  ros::NodeHandle& private_nh = getPrivateNodeHandle();
+  bool enable;
+  private_nh.param("enable", enable, true);
+
+  if (enable)
+    load_calibration();
+  else
+    ROS_INFO("Depth calibration disabled by launch file");
 }
 
 void DepthAdjuster::load_calibration()
@@ -40,7 +47,11 @@ void DepthAdjuster::load_calibration()
 void DepthAdjuster::apply_calibration_cb(const sensor_msgs::ImageConstPtr& depth_msg)
 {
   if (depth_multiplier_correction_.empty())
+  {
+    //just relay to make sure stuff still works
+    pub_calibrated_depth_raw_.publish(depth_msg);
     return;
+  }
 
   cv_bridge::CvImagePtr cv_depth_image;
   try

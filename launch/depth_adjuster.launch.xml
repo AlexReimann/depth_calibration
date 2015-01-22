@@ -6,12 +6,14 @@
     
     <arg name="input_camera_info_topic"             default="camera/depth_capture/camera_info"/>
     <arg name="output_camera_info_relay_topic"      default="camera/depth/camera_info"/>
+    <arg name="enable_adjust"                       default="true"/>
 
     <node pkg="nodelet" type="nodelet" name="depth_adjuster" args="load depth_calibration/depth_adjuster $(arg manager)">
         <remap from="input_depth_raw"               to="$(arg input_depth_raw_topic)"/>
         <remap from="output_depth_raw"              to="$(arg output_depth_raw_topic)"/>
         
         <remap from="input_camera_info"             to="$(arg input_camera_info_topic)"/>
-        <remap from="output_camera_info_relay"      to="$(arg output_camera_info_relay_topic)"/>        
+        <remap from="output_camera_info_relay"      to="$(arg output_camera_info_relay_topic)"/>
+        <param name="enable"                        type="bool"         value="$(arg enable_adjust)"/>       
     </node>
 </launch>

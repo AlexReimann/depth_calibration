@@ -50,7 +50,7 @@ boost::shared_ptr<pcl::ModelCoefficients> getPlane(pcl::PointCloud<pcl::PointXYZ
   segmentation.setModelType(pcl::SACMODEL_PLANE);
   segmentation.setMethodType(pcl::SAC_RANSAC);
 
-  segmentation.setDistanceThreshold(0.0005); //we gotta catch'em all, so set that low
+  segmentation.setDistanceThreshold(0.1); //we gotta catch'em all, so set that low
   segmentation.setMaxIterations(1000); //wanna be the very best, so set that high
 
   segmentation.setInputCloud(temp_cloud);
