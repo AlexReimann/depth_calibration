@@ -46,7 +46,7 @@ class DepthCalibration:
             if(rospy.is_shutdown()):
                 return
         
-        wait_time = 3
+        wait_time = 10
         rospy.loginfo("%s: Calibration started", rospy.get_name())
         time.sleep(wait_time);  # wait some time, should take less than 3 seconds (with 10Hz)
         

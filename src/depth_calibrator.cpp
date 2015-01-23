@@ -13,7 +13,12 @@
 
 image_geometry::PinholeCameraModel camera_model_;
 cv::Mat depth_multiplier_correction_;
-boost::mutex multiplier_mutex_;
+
+cv::Mat valid_depth_count_;
+cv::Mat depth_sum_;
+
+cv::Mat planes_sum_;
+unsigned int planes_count_;
 
 std::vector<float> plane_coefficients_;
 boost::mutex coefficients_mutex_;
@@ -32,12 +37,25 @@ void camera_info_cb(const sensor_msgs::CameraInfoConstPtr& info_msg)
     return;
 
   camera_model_.fromCameraInfo(info_msg);
-  if (depth_multiplier_correction_.empty())
-    depth_multiplier_correction_ = cv::Mat::ones(camera_model_.fullResolution(), CV_64F);
+  if (planes_sum_.empty())
+  {
+    valid_depth_count_ = cv::Mat::zeros(camera_model_.fullResolution(), CV_64F);
+    depth_sum_ = cv::Mat::zeros(camera_model_.fullResolution(), CV_64F);
+
+    planes_sum_ = cv::Mat::zeros(camera_model_.fullResolution(), CV_64F);
+    planes_count_ = 0;
+  }
 }
 
 void depth_image_cb(const sensor_msgs::ImageConstPtr& image_msg)
 {
+  if(!calibration_finished_)
+  {
+    pub_calibrated_depth_.publish(image_msg);
+    depth_updated_ = true;
+    return;
+  }
+
   cv_bridge::CvImagePtr cv_depth_image;
   try
   {
@@ -49,18 +67,14 @@ void depth_image_cb(const sensor_msgs::ImageConstPtr& image_msg)
     return;
   }
 
-  if (multiplier_mutex_.try_lock())
-  {
-    cv::Mat depth_double;
-    cv_depth_image->image.convertTo(depth_double, CV_64F);
+  cv::Mat depth_double;
+  cv_depth_image->image.convertTo(depth_double, CV_64F);
 
-    depth_double = (depth_double).mul(depth_multiplier_correction_);
-    multiplier_mutex_.unlock();
+  depth_double = (depth_double).mul(depth_multiplier_correction_);
 
-    depth_double.convertTo(cv_depth_image->image, CV_16U);
-    pub_calibrated_depth_.publish(cv_depth_image->toImageMsg());
-    depth_updated_ = true;
-  }
+  depth_double.convertTo(cv_depth_image->image, CV_16U);
+  pub_calibrated_depth_.publish(cv_depth_image->toImageMsg());
+  depth_updated_ = true;
 }
 
 void update_plane_coeff(const std_msgs::Float32MultiArrayConstPtr& plane_coeffcients)
@@ -145,7 +159,6 @@ void publish_multiplier()
 
 void calibration_cb(const sensor_msgs::ImageConstPtr& image_msg)
 {
-  boost::mutex::scoped_lock multiplier_lock(multiplier_mutex_);
 
   if (calibration_finished_)
     return;
@@ -184,19 +197,32 @@ void calibration_cb(const sensor_msgs::ImageConstPtr& image_msg)
   cv::minMaxLoc(plane, &min, &max);
   ROS_INFO("Estimated plane mean: %f, min: %f, max %f", cv::mean(plane)[0], min, max);
 
-  //update incrementally
-  depth_multiplier_correction_ = (plane / depth_double).mul(depth_multiplier_correction_);
+  cv::minMaxLoc(depth_double, &min, &max);
+  ROS_INFO("Estimated depth_double mean: %f, min: %f, max %f", cv::mean(depth_double)[0], min, max);
 
-  cv::minMaxLoc(depth_multiplier_correction_, &min, &max);
-  ROS_INFO("Multiplier mean: %f, min: %f, max %f", cv::mean(depth_multiplier_correction_)[0], min, max);
-  ROS_INFO("---------------------------------------------------------------------------");
+  cv::Mat is_valid = (depth_double != 0) / 255;
+  cv::Mat is_valid_converted;
+  is_valid.convertTo(is_valid_converted, CV_64F);
 
-//  void publish_multiplier(); //maybe for later
+  valid_depth_count_ += is_valid_converted;
+  depth_sum_ += depth_double;
+
+  planes_sum_ += plane;
+  planes_count_++;
 }
 
 void save_multiplier(const std_msgs::EmptyConstPtr& empty)
 {
-  boost::mutex::scoped_lock multiplier_lock(multiplier_mutex_);
+  ///TODO Make this numerical stable
+  depth_multiplier_correction_ = (planes_sum_ / planes_count_) / (depth_sum_ / valid_depth_count_);
+
+  double min = 0;
+  double max = 0;
+  cv::minMaxLoc(depth_multiplier_correction_, &min, &max);
+  ROS_INFO("Multiplier mean: %f, min: %f, max %f", cv::mean(depth_multiplier_correction_)[0], min, max);
+
+  //  void publish_multiplier(); //maybe for later
+
   calibration_finished_ = true;
 
   ROS_INFO("Saving calibration");
