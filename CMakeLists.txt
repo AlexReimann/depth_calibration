@@ -42,6 +42,10 @@ target_link_libraries(depth_calibrator ${catkin_LIBRARIES})
 add_executable(center_plane_extractor src/center_plane_extractor.cpp)
 target_link_libraries(center_plane_extractor ${catkin_LIBRARIES})
 
+install(TARGETS ${PROJECT_NAME}
+  DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+)
+
 install(FILES
   launch/depth_calibration.launch
   launch/extrinsic_plane_calibration.launch
