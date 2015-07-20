@@ -1,16 +1,22 @@
 
 <launch>
-    <arg name="cloud_topic"                     default="/gopher/sensor_3d/depth/points"/>
+    <arg name="cloud_topic"                     default="camera/depth/points"/>
     
     <arg name="base_footprint_frame"            default="base_footprint"/>
-    <arg name="depth_points_frame"              default="sensor_3d_rgb_optical_frame"/>
-    <arg name="test_publish_frame"              default="calibrated_depth_sensor_frame"/>
+    <arg name="depth_points_frame"              default="camera_rgb_optical_frame"/>
+    <arg name="test_publish_frame"              default="calibrated_depth_optical_frame"/>
     
-    <arg name="plane_coefficients_topic"        value="sensor_3d/depth/calibration/plane"/>
+    <arg name="calibrated_urdf_path"            default="camera_info/xtion_calibrated.urdf.xacro"/>
+    <arg name="plane_coefficients_topic"        value="camera/depth/calibration/plane"/>
     
     <node pkg="depth_calibration" type="center_plane_extractor" name="center_plane_extractor" output="screen">   
         <remap from="cloud"                     to="$(arg cloud_topic)"/>
         <remap from="plane_coefficients"        to="$(arg plane_coefficients_topic)"/>
+        
+        <param name="base_footprint_frame"      type="string"       value="$(arg base_footprint_frame)"/>
+        <param name="depth_points_frame"        type="string"       value="$(arg depth_points_frame)"/>
+        <param name="test_publish_frame"        type="string"       value="$(arg test_publish_frame)"/>
+        <param name="calibrated_urdf_path"      type="string"       value="$(arg calibrated_urdf_path)"/>
     </node>
     
     <node pkg="depth_calibration" type="extrinsic_plane_calibration.py" name="extrinsic_plane_calibration" output="screen">
