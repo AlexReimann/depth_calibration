@@ -20,7 +20,7 @@ public:
   virtual void relay_camera_info(const sensor_msgs::CameraInfoConstPtr& depth_msg);
 
 protected:
-  virtual void load_calibration();
+  virtual void load_calibration(std::string file_path);
 
   ros::Subscriber sub_depth_raw_;
   ros::Publisher pub_calibrated_depth_raw_;

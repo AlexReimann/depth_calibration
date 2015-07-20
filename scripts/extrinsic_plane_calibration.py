@@ -13,13 +13,15 @@ class ExtrinsicPlaneCalibration:
 
     def __init__(self):        
         self.camera_info_subscriber = rospy.Subscriber("plane_coefficients", Float32MultiArray, self.plane_cb)
-        self.camera_transform = "sensor_3d_rgb_optical_frame"
+        self.camera_transform = "camera_rgb_optical_frame"
         self.tf_broadcaster = tf.TransformBroadcaster()
         self.listener = tf.TransformListener()
         
         self.base_footprint_frame = rospy.get_param('~base_footprint_frame', 'base_footprint')
-        self.depth_points_frame = rospy.get_param('~depth_points_frame', 'sensor_3d_rgb_optical_frame')
-        self.test_publish_frame = rospy.get_param('~"test_publish_frame"', 'calibrated_depth_sensor_frame')
+        self.depth_points_frame = rospy.get_param('~depth_points_frame', 'camera_rgb_optical_frame')
+        self.test_publish_frame = rospy.get_param('~test_publish_frame', 'calibrated_depth_sensor_frame')
+        
+        self.calibrated_urdf_path = rospy.get_param('~calibrated_urdf_path', 'camera_info/xtion_calibrated.urdf.xacro')
         
 
     def plane_cb(self, plane_coefficients):
@@ -31,6 +33,7 @@ class ExtrinsicPlaneCalibration:
         y = -plane_coefficients.data[1]
         z = -plane_coefficients.data[2]
         d = plane_coefficients.data[3]
+#         d = 0.9
                 
         if(z < 0):
             z *= -1.0
@@ -99,7 +102,7 @@ class ExtrinsicPlaneCalibration:
         
         
     def save_calibration(self, angle_x, angle_y, angle_z, distance_vec):
-        file_path = "camera_info/xtion_calibrated.urdf.xacro"
+        file_path = self.calibrated_urdf_path
         ET.register_namespace("xacro", "http://www.ros.org/wiki/xacro")
         
         xml_tree = ET.parse(file_path)

@@ -18,15 +18,17 @@ void DepthAdjuster::onInit()
   bool enable;
   private_nh.param("enable", enable, true);
 
+  std::string calibration_file_path;
+  private_nh.param("calibration_file_path", calibration_file_path, std::string("camera_info/depth_calibration.yaml"));
+
   if (enable)
-    load_calibration();
+    load_calibration(calibration_file_path);
   else
     ROS_INFO("Depth calibration disabled by launch file");
 }
 
-void DepthAdjuster::load_calibration()
+void DepthAdjuster::load_calibration(std::string file_path)
 {
-  std::string file_path = "camera_info/depth_calibration.yaml";
   cv::FileStorage file_storage(file_path, cv::FileStorage::READ);
 
   if (!file_storage.isOpened())

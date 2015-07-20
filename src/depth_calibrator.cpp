@@ -26,6 +26,8 @@ boost::mutex coefficients_mutex_;
 ros::Publisher pub_multiplier_matrix_;
 ros::Publisher pub_calibrated_depth_;
 
+std::string calibration_file_path_;
+
 bool calibration_finished_;
 bool depth_updated_;
 
@@ -225,8 +227,8 @@ void save_multiplier(const std_msgs::EmptyConstPtr& empty)
 
   calibration_finished_ = true;
 
-  ROS_INFO("Saving calibration");
-  cv::FileStorage file_storage("camera_info/depth_calibration.yaml", cv::FileStorage::WRITE);
+  ROS_INFO_STREAM("Saving calibration to " << calibration_file_path_);
+  cv::FileStorage file_storage(calibration_file_path_, cv::FileStorage::WRITE);
 
   time_t rawtime;
   time(&rawtime);
@@ -254,6 +256,8 @@ int main(int argc, char** argv)
 
   ros::Subscriber sub_plane = nh.subscribe<std_msgs::Float32MultiArray>("plane_coefficients", 1, update_plane_coeff); ///
   ros::Subscriber sub_save = nh.subscribe<std_msgs::Empty>("save_calibration_trigger", 1, save_multiplier);
+
+  nh_priv.param("calibration_file_path", calibration_file_path_, std::string("camera_info/depth_calibration.yaml"));
 
   int rate = 30;
   ros::Rate spin_rate(rate);
