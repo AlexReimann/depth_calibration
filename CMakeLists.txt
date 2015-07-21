@@ -14,8 +14,12 @@ find_package(catkin REQUIRED
 )
 
 find_package(Boost REQUIRED COMPONENTS thread)
+find_package(OpenCV REQUIRED)
 
-catkin_package(CATKIN_DEPENDS
+catkin_package(
+  DEPENDS
+    OpenCV
+  CATKIN_DEPENDS
     rospy
     roscpp
     std_msgs
@@ -26,18 +30,19 @@ catkin_package(CATKIN_DEPENDS
     image_geometry
 )
 
-include_directories(include ${PCL_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS} ${catkin_INCLUDE_DIRS})
+include_directories(include ${PCL_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS} ${OpenCV_INCLUDE_DIRS} ${catkin_INCLUDE_DIRS})
 
 add_library(${PROJECT_NAME}
     src/depth_adjuster.cpp
 )
+target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
 
 install(FILES nodelet_plugins.xml
         DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
 )
 
 add_executable(depth_calibrator src/depth_calibrator.cpp)
-target_link_libraries(depth_calibrator ${catkin_LIBRARIES})
+target_link_libraries(depth_calibrator ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
 
 add_executable(center_plane_extractor src/center_plane_extractor.cpp)
 target_link_libraries(center_plane_extractor ${catkin_LIBRARIES})
