@@ -8,6 +8,7 @@
     <arg name="output_camera_info_relay_topic"      default="camera/depth/camera_info"/>
     
     <arg name="calibration_file_path"               default="camera_info/depth_calibration.yaml"/>
+    <arg name="unknown_depth_distance"              default="0.0"/>
     <arg name="enable_adjust"                       default="true"/>
 
     <node pkg="nodelet" type="nodelet" name="depth_adjuster" args="load depth_calibration/depth_adjuster $(arg manager)">
@@ -18,6 +19,7 @@
         <remap from="output_camera_info_relay"      to="$(arg output_camera_info_relay_topic)"/>
         
         <param name="calibration_file_path"         type="string"       value="$(arg calibration_file_path)"/>
+        <param name="unknown_depth_distance"        type="double"       value="$(arg unknown_depth_distance)"/>
         <param name="enable"                        type="bool"         value="$(arg enable_adjust)"/>       
     </node>
 </launch>

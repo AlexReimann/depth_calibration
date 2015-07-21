@@ -25,6 +25,8 @@ protected:
   ros::Subscriber sub_depth_raw_;
   ros::Publisher pub_calibrated_depth_raw_;
 
+  double unknown_depth_distance_;
+
   cv::Mat depth_multiplier_correction_;
   boost::mutex multiplier_mutex_;
 

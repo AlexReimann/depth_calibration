@@ -25,6 +25,9 @@ void DepthAdjuster::onInit()
     load_calibration(calibration_file_path);
   else
     ROS_INFO("Depth calibration disabled by launch file");
+
+  private_nh.param("unknown_depth_distance", unknown_depth_distance_, 0.0);
+  unknown_depth_distance_ = unknown_depth_distance_ * 1000; //convert to depth value, which are in mm
 }
 
 void DepthAdjuster::load_calibration(std::string file_path)
@@ -69,6 +72,11 @@ void DepthAdjuster::apply_calibration_cb(const sensor_msgs::ImageConstPtr& depth
   cv::Mat depth_double;
   cv_depth_image->image.convertTo(depth_double, CV_64F);
   depth_double = (depth_double).mul(depth_multiplier_correction_);
+
+  cv::Mat zero_addition = (depth_double == 0); //if true value is set to 255, so divide by 255 later
+  zero_addition.convertTo(zero_addition, CV_64F);
+
+  depth_double += (zero_addition * unknown_depth_distance_ / 255.0);
 
   depth_double.convertTo(cv_depth_image->image, CV_16U);
   pub_calibrated_depth_raw_.publish(cv_depth_image->toImageMsg());
