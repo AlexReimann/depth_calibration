@@ -1,4 +1,6 @@
 #include <depth_calibration/depth_adjuster.h>
+
+#include <depth_calibration/border_value.h>
 #include <pluginlib/class_list_macros.h>
 
 namespace depth_calibration
@@ -71,12 +73,16 @@ void DepthAdjuster::apply_calibration_cb(const sensor_msgs::ImageConstPtr& depth
 
   cv::Mat depth_double;
   cv_depth_image->image.convertTo(depth_double, CV_64F);
-  depth_double = (depth_double).mul(depth_multiplier_correction_);
+  depth_double = depth_double.mul(depth_multiplier_correction_);
 
   cv::Mat zero_addition = (depth_double == 0); //if true value is set to 255, so divide by 255 later
   zero_addition.convertTo(zero_addition, CV_64F);
 
   depth_double += (zero_addition * unknown_depth_distance_ / 255.0);
+
+  cv::Mat not_border = (depth_multiplier_correction_ != BORDER_VALUE) / 255.0;
+  not_border.convertTo(not_border, CV_64F);
+  depth_double = depth_double.mul(not_border);
 
   depth_double.convertTo(cv_depth_image->image, CV_16U);
   pub_calibrated_depth_raw_.publish(cv_depth_image->toImageMsg());

@@ -11,6 +11,8 @@
 #include <std_msgs/Float64MultiArray.h>
 #include <std_msgs/Empty.h>
 
+#include <depth_calibration/border_value.h>
+
 image_geometry::PinholeCameraModel camera_model_;
 cv::Mat depth_multiplier_correction_;
 
@@ -72,7 +74,10 @@ void depth_image_cb(const sensor_msgs::ImageConstPtr& image_msg)
   cv::Mat depth_double;
   cv_depth_image->image.convertTo(depth_double, CV_64F);
 
-  depth_double = (depth_double).mul(depth_multiplier_correction_);
+  cv::Mat not_border = (depth_multiplier_correction_ != depth_calibration::BORDER_VALUE) / 255.0;
+  not_border.convertTo(not_border, CV_64F);
+
+  depth_double = (depth_double).mul(depth_multiplier_correction_.mul(not_border));
 
   depth_double.convertTo(cv_depth_image->image, CV_16U);
   pub_calibrated_depth_.publish(cv_depth_image->toImageMsg());
@@ -222,6 +227,12 @@ void save_multiplier(const std_msgs::EmptyConstPtr& empty)
   double max = 0;
   cv::minMaxLoc(depth_multiplier_correction_, &min, &max);
   ROS_INFO("Multiplier mean: %f, min: %f, max %f", cv::mean(depth_multiplier_correction_)[0], min, max);
+
+  //give the borders / damaged parts a special value (-1)
+  cv::Mat borders = (depth_multiplier_correction_ == 0) / 255.0;
+  borders.convertTo(borders, CV_64F);
+
+  depth_multiplier_correction_ = depth_multiplier_correction_ + borders * depth_calibration::BORDER_VALUE;
 
   //  void publish_multiplier(); //maybe for later
 
