@@ -21,11 +21,17 @@ public:
 
 protected:
   virtual void load_calibration(std::string file_path);
+  virtual void remove_borders(cv::Mat& image);
 
   ros::Subscriber sub_depth_raw_;
   ros::Publisher pub_calibrated_depth_raw_;
 
   double unknown_depth_distance_;
+
+  double border_percentage_top_;
+  double border_percentage_bottom_;
+  double border_percentage_left_;
+  double border_percentage_right_;
 
   cv::Mat depth_multiplier_correction_;
   boost::mutex multiplier_mutex_;
