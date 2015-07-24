@@ -31,7 +31,6 @@
   <arg name="ir"                    default="ir" />
   <arg name="depth"                 default="depth" />
   <arg name="uncalibrated_depth"    default="uncalibrated_depth" />
-  <arg name="calibration_file_path" default="camera_info/depth_calibration.yaml"/>
 
   <!-- Optionally suppress loading the driver nodelet and/or publishing the default tf
        tree. Useful if you are playing back recorded raw data from a bag, or are
@@ -94,8 +93,18 @@
       <arg name="output_depth_raw_topic"          value="$(arg depth)/image_raw" />
       <arg name="input_camera_info_topic"         value="$(arg uncalibrated_depth)/camera_info" />
       <arg name="output_camera_info_relay_topic"  value="$(arg depth)/camera_info" />
-      <arg name="calibration_file_path"           value="$(arg calibration_file_path)"/>      
-      <arg name="enable_adjust" value="true" />
+      
+      <arg name="unknown_depth_distance"          value="0.0"/>
+      <arg name="is_occluded_percentage"          value="1.0"/>
+      <arg name="occluded_distance"               value="0.1"/>
+      
+      <arg name="border_percentage_top"           value="0.00"/>
+      <arg name="border_percentage_bottom"        value="0.00"/>
+      <arg name="border_percentage_left"          value="0.00"/>
+      <arg name="border_percentage_right"         value="0.00"/>
+      
+      <arg name="calibration_file_path"           value="camera_info/depth_calibration.yaml"/>
+      <arg name="enable_adjust"                   value="true" />
     </include>
 
     <!-- Load standard constellation of processing nodelets -->

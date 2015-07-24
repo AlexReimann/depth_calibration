@@ -29,6 +29,9 @@ void DepthAdjuster::onInit()
   private_nh.param("unknown_depth_distance", unknown_depth_distance_, 0.0);
   unknown_depth_distance_ = unknown_depth_distance_ * 1000; //convert to depth value, which are in mm
 
+  private_nh.param("is_occluded_percentage", is_occluded_percentage_, 1.0);
+  private_nh.param("occluded_distance", occluded_distance_, 0.1);
+
   private_nh.param("border_percentage_top", border_percentage_top_, 0.0);
   private_nh.param("border_percentage_bottom", border_percentage_bottom_, 0.0);
   private_nh.param("border_percentage_left", border_percentage_left_, 0.0);
@@ -86,13 +89,24 @@ void DepthAdjuster::apply_calibration_cb(const sensor_msgs::ImageConstPtr& depth
   }
 
   cv::Mat depth_double = cv_depth_image->image.clone();
+  cv::Mat zero_addition = (depth_double == 0); //if true value is set to 255, so divide by 255 later
+
   depth_double.convertTo(depth_double, CV_64F);
   depth_double = (depth_double).mul(depth_multiplier_correction_);
 
-  cv::Mat zero_addition = (depth_double == 0); //if true value is set to 255, so divide by 255 later
-  zero_addition.convertTo(zero_addition, CV_64F);
+  int unknown_distances_count = cv::countNonZero(zero_addition);
 
-  depth_double += (zero_addition * unknown_depth_distance_ / 255.0);
+  if(unknown_distances_count <= depth_multiplier_correction_.total() * is_occluded_percentage_)
+  {
+    zero_addition.convertTo(zero_addition, CV_64F);
+    depth_double += (zero_addition * unknown_depth_distance_ / 255.0);
+  }
+  else
+  {
+    ROS_WARN_THROTTLE(5.0, "3D sensors seems to be occluded");
+    zero_addition.convertTo(zero_addition, CV_64F);
+    depth_double += (zero_addition * occluded_distance_ * 1000 / 255.0);
+  }
 
   if (border_percentage_top_ != 0.0 || border_percentage_bottom_ != 0.0 || border_percentage_left_ != 0.0
       || border_percentage_right_ != 0.0)

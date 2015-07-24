@@ -8,6 +8,9 @@
     <arg name="output_camera_info_relay_topic"      default="camera/depth/camera_info"/>
     
     <arg name="unknown_depth_distance"              default="0.0"/>
+    <arg name="is_occluded_percentage"              default="1.0"/> <!-- includes unknown at the borders -->
+    <arg name="occluded_distance"                   default="0.1"/>
+    
     <arg name="border_percentage_top"               default="0.0"/>
     <arg name="border_percentage_bottom"            default="0.0"/>
     <arg name="border_percentage_left"              default="0.0"/>
@@ -24,6 +27,9 @@
         <remap from="output_camera_info_relay"      to="$(arg output_camera_info_relay_topic)"/>
         
         <param name="unknown_depth_distance"        type="double"       value="$(arg unknown_depth_distance)"/>
+        <param name="is_occluded_percentage"        type="double"       value="$(arg is_occluded_percentage)"/>
+        <param name="occluded_distance"             type="double"       value="$(arg occluded_distance)"/> 
+
         <param name="border_percentage_top"         type="double"       value="$(arg border_percentage_top)"/>
         <param name="border_percentage_bottom"      type="double"       value="$(arg border_percentage_bottom)"/>
         <param name="border_percentage_left"        type="double"       value="$(arg border_percentage_left)"/>
