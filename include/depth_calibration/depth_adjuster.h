@@ -27,6 +27,7 @@ protected:
   ros::Publisher pub_calibrated_depth_raw_;
 
   double unknown_depth_distance_;
+  double unknown_adjust_max_percentage_;
 
   double border_percentage_top_;
   double border_percentage_bottom_;
@@ -34,7 +35,6 @@ protected:
   double border_percentage_right_;
 
   cv::Mat depth_multiplier_correction_;
-  boost::mutex multiplier_mutex_;
 
   ros::Subscriber sub_camera_info_;
   ros::Publisher pub_camera_info_relay_;
