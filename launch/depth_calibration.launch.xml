@@ -2,7 +2,8 @@
 <launch>
     <arg name="camera_info_topic"               default="camera/depth/camera_info"/>
     <arg name="depth_raw_topic"                 default="camera/depth/image_raw"/>
-    <arg name="calibration_file_path"           default="camera_info/depth_calibration.yaml"/>
+    <arg name="plane_distance"                  default="0.0"/> <!-- 0.0 means use estimation from point cloud -->
+    <arg name="calibration_file_path"           default="camera_info/depth_calibration.yaml"/>    
 
     <arg name="calibrated_depth_topic"          value="sensor_3d/depth/calibration/depth_calibrated"/>
     <arg name="calibrated_cloud_topic"          value="sensor_3d/depth/calibration/points"/>
@@ -33,6 +34,7 @@
         <remap from="calibrated_cloud"          to="$(arg calibrated_cloud_topic)"/>
         <remap from="save_calibration_trigger"  to="$(arg save_calibration_trigger_topic)"/>
         
+        <param name="plane_distance"            type="double"       value="$(arg plane_distance)"/>
         <param name="calibration_file_path"     type="string"       value="$(arg calibration_file_path)"/>
     </node>
 
