@@ -26,6 +26,7 @@ boost::mutex coefficients_mutex_;
 ros::Publisher pub_multiplier_matrix_;
 ros::Publisher pub_calibrated_depth_;
 
+double plane_distance_;
 std::string calibration_file_path_;
 
 bool calibration_finished_;
@@ -116,7 +117,12 @@ cv::Mat calculate_plane(std::vector<float>& plane_coefficients, unsigned int hei
   double a = plane_coefficients[0];
   double b = plane_coefficients[1];
   double c = plane_coefficients[2];
-  double d = plane_coefficients[3];
+  double d = -plane_distance_;
+
+  if(plane_distance_ == 0.0)
+  {
+    d = plane_coefficients[3];
+  }
 
   cv::Mat x_index = make_column_index_matrix(height, width);
   cv::Mat y_index = make_column_index_matrix(width, height).t();
@@ -194,13 +200,16 @@ void calibration_cb(const sensor_msgs::ImageConstPtr& image_msg)
 
   cv::Mat plane = calculate_plane(plane_coefficients, depth_double.rows, depth_double.cols);
 
+  if(plane_distance_ == 0.0)
+    ROS_INFO("Estimated plane distance: %f", std::abs(plane_coefficients[3]));
+
   double min = 0;
   double max = 0;
-  cv::minMaxLoc(plane, &min, &max);
-  ROS_INFO("Estimated plane mean: %f, min: %f, max %f", cv::mean(plane)[0], min, max);
-
   cv::minMaxLoc(depth_double, &min, &max);
-  ROS_INFO("Estimated depth_double mean: %f, min: %f, max %f", cv::mean(depth_double)[0], min, max);
+  ROS_INFO("Measured depth mean = %f, min = %f, max = %f", cv::mean(depth_double)[0], min, max);
+
+  cv::minMaxLoc(plane, &min, &max);
+  ROS_INFO("Estimated plane: mean = %f, min = %f, max =  %f", cv::mean(plane)[0], min, max);
 
   cv::Mat is_valid = (depth_double != 0) / 255;
   cv::Mat is_valid_converted;
@@ -258,6 +267,12 @@ int main(int argc, char** argv)
   ros::Subscriber sub_save = nh.subscribe<std_msgs::Empty>("save_calibration_trigger", 1, save_multiplier);
 
   nh_priv.param("calibration_file_path", calibration_file_path_, std::string("camera_info/depth_calibration.yaml"));
+  nh_priv.param("plane_distance", plane_distance_, 0.0);
+
+  if(plane_distance_ == 0.0)
+  {
+    ROS_WARN("plane_distance arg is zero. The average estimated distance will be used which might be inaccurate.");
+  }
 
   int rate = 30;
   ros::Rate spin_rate(rate);

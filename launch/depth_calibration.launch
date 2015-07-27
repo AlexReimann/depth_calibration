@@ -2,12 +2,14 @@
 <launch>
 	<arg name="info"                   default="/camera/depth/camera_info" />
 	<arg name="depth"                  default="/camera/depth/image_raw" />
-	<arg name="calibration_file_path"  default="camera_info/depth_calibration.yaml"/>
+	<arg name="plane_distance"         default="0.0"/> <!-- 0.0 means use estimation from point cloud -->
+	<arg name="calibration_file_path"  default="camera_info/depth_calibration.yaml"/>	
 
 	<include
 		file="$(find depth_calibration)/launch/depth_calibration.launch.xml">
 		<arg name="camera_info_topic"     value="$(arg info)" />
 		<arg name="depth_raw_topic"       value="$(arg depth)" />
-		<arg name="calibration_file_path" value="$(arg calibration_file_path)" />
+		<arg name="plane_distance"        value="$(arg plane_distance)" />
+		<arg name="calibration_file_path" value="$(arg calibration_file_path)" />		
 	</include>
 </launch>
