@@ -30,7 +30,7 @@ void DepthAdjuster::onInit()
   unknown_depth_distance_ = unknown_depth_distance_ * 1000; //convert to depth value, which are in mm
 
   private_nh.param("is_occluded_percentage", is_occluded_percentage_, 1.0);
-  private_nh.param("occluded_distance", occluded_distance_, 0.1);
+  private_nh.param("occluded_distance", occluded_distance_, 0.0);
 
   private_nh.param("border_percentage_top", border_percentage_top_, 0.0);
   private_nh.param("border_percentage_bottom", border_percentage_bottom_, 0.0);

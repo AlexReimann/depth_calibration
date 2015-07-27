@@ -9,7 +9,7 @@
     
     <arg name="unknown_depth_distance"              default="0.0"/>
     <arg name="is_occluded_percentage"              default="1.0"/> <!-- includes unknown at the borders -->
-    <arg name="occluded_distance"                   default="0.1"/>
+    <arg name="occluded_distance"                   default="0.0"/>
     
     <arg name="border_percentage_top"               default="0.0"/>
     <arg name="border_percentage_bottom"            default="0.0"/>

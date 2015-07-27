@@ -96,7 +96,7 @@
       
       <arg name="unknown_depth_distance"          value="0.0"/>
       <arg name="is_occluded_percentage"          value="1.0"/>
-      <arg name="occluded_distance"               value="0.1"/>
+      <arg name="occluded_distance"               value="0.0"/>
       
       <arg name="border_percentage_top"           value="0.00"/>
       <arg name="border_percentage_bottom"        value="0.00"/>
