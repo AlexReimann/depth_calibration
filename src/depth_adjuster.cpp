@@ -59,22 +59,13 @@ void DepthAdjuster::load_calibration(std::string file_path)
 
 void DepthAdjuster::apply_calibration_cb(const sensor_msgs::ImageConstPtr& depth_msg)
 {
-  if (depth_multiplier_correction_.empty())
-  {
-    //just relay to make sure stuff still works
-    pub_calibrated_depth_raw_.publish(depth_msg);
-    return;
-  }
-
-  if (depth_msg->width != depth_multiplier_correction_.cols || depth_msg->height != depth_multiplier_correction_.rows)
+  if (!depth_multiplier_correction_.empty() && (depth_msg->width != depth_multiplier_correction_.cols || depth_msg->height != depth_multiplier_correction_.rows))
   {
     ROS_ERROR_STREAM("[Depth adjuster] Calibration file has different resolution than camera depth image");
     ROS_ERROR_STREAM(
         "[Depth adjuster] Calibration multiplier: " << depth_multiplier_correction_.cols << "x" << depth_multiplier_correction_.rows << ", depth image: " << depth_msg->width << "x" << depth_msg->height);
-    ROS_WARN_STREAM("[Depth adjuster] Skipping depth adjustments.");
+    ROS_WARN_STREAM("[Depth adjuster] Skipping depth calibration adjustments.");
     depth_multiplier_correction_.release();
-    pub_calibrated_depth_raw_.publish(depth_msg);
-    return;
   }
 
   cv_bridge::CvImagePtr cv_depth_image;
@@ -92,11 +83,14 @@ void DepthAdjuster::apply_calibration_cb(const sensor_msgs::ImageConstPtr& depth
   cv::Mat zero_addition = (depth_double == 0); //if true value is set to 255, so divide by 255 later
 
   depth_double.convertTo(depth_double, CV_64F);
-  depth_double = (depth_double).mul(depth_multiplier_correction_);
+  if (!depth_multiplier_correction_.empty())
+  {
+    depth_double = (depth_double).mul(depth_multiplier_correction_);
+  }
 
   int unknown_distances_count = cv::countNonZero(zero_addition);
 
-  if(unknown_distances_count <= depth_multiplier_correction_.total() * is_occluded_percentage_)
+  if(unknown_distances_count <= depth_double.total() * is_occluded_percentage_)
   {
     zero_addition.convertTo(zero_addition, CV_64F);
     depth_double += (zero_addition * unknown_depth_distance_ / 255.0);
