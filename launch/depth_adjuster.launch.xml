@@ -7,6 +7,7 @@
     <arg name="input_camera_info_topic"             default="camera/depth_capture/camera_info"/>
     <arg name="output_camera_info_relay_topic"      default="camera/depth/camera_info"/>
     
+    <arg name="max_distance"                        default="0.0"/>
     <arg name="unknown_depth_distance"              default="0.0"/>
     <arg name="is_occluded_percentage"              default="1.0"/> <!-- includes unknown at the borders -->
     <arg name="occluded_distance"                   default="0.0"/>
@@ -26,6 +27,7 @@
         <remap from="input_camera_info"             to="$(arg input_camera_info_topic)"/>
         <remap from="output_camera_info_relay"      to="$(arg output_camera_info_relay_topic)"/>
         
+        <param name="max_distance"                  type="double"       value="$(arg max_distance)"/>
         <param name="unknown_depth_distance"        type="double"       value="$(arg unknown_depth_distance)"/>
         <param name="is_occluded_percentage"        type="double"       value="$(arg is_occluded_percentage)"/>
         <param name="occluded_distance"             type="double"       value="$(arg occluded_distance)"/> 

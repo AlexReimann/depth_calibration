@@ -21,11 +21,14 @@ public:
 
 protected:
   virtual void load_calibration(std::string file_path);
+  virtual void removeOutliers(cv::Mat& image);
   virtual void remove_borders(cv::Mat& image);
 
   ros::Subscriber sub_depth_raw_;
   ros::Publisher pub_calibrated_depth_raw_;
+  ros::Publisher pub_inlier_;
 
+  double max_distance_;
   double unknown_depth_distance_;
   double is_occluded_percentage_;
   double occluded_distance_;
