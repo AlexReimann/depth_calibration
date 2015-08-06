@@ -13,7 +13,7 @@ find_package(catkin REQUIRED
     nodelet
 )
 
-find_package(Boost REQUIRED COMPONENTS thread)
+find_package(Boost REQUIRED COMPONENTS thread filesystem)
 find_package(OpenCV REQUIRED)
 
 catkin_package(

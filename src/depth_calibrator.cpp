@@ -1,5 +1,6 @@
 #include <time.h>
 #include <boost/thread/mutex.hpp>
+#include <boost/filesystem.hpp>
 
 #include <ros/ros.h>
 #include <cv_bridge/cv_bridge.h>
@@ -236,7 +237,23 @@ void save_multiplier(const std_msgs::EmptyConstPtr& empty)
 
   calibration_finished_ = true;
 
-  ROS_INFO_STREAM("Saving calibration to " << calibration_file_path_);
+  boost::filesystem::path path(calibration_file_path_);
+  boost::filesystem::path directory = path.parent_path();
+
+  if(!boost::filesystem::is_directory(directory))
+  {
+    ROS_WARN_STREAM("Calibration file directory does not exist! Trying to create it now.. ");
+
+    if(!boost::filesystem::create_directories(directory))
+    {
+      ROS_ERROR("Saving failed for some unknown reason. Maybe check path name and access rights");
+      return;
+    }
+
+    ROS_WARN_STREAM("Directory created.");
+  }
+
+  ROS_WARN_STREAM("Saving calibration to " << calibration_file_path_);
   cv::FileStorage file_storage(calibration_file_path_, cv::FileStorage::WRITE);
 
   time_t rawtime;
