@@ -51,9 +51,11 @@ target_link_libraries(center_plane_extractor ${catkin_LIBRARIES})
 # Installs
 ##############################################################################
 
-install(TARGETS ${PROJECT_NAME}
-  DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-)
+install(TARGETS ${PROJECT_NAME} 
+  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION})
+  
+install(TARGETS depth_calibrator center_plane_extractor
+  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 
 install(DIRECTORY launch
         DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
