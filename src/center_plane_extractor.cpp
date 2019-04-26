@@ -21,19 +21,27 @@ pcl::PointCloud<pcl::PointXYZ>::Ptr center_extraction(pcl::PCLPointCloud2Ptr clo
   pcl::PointXYZ min;
   pcl::PointXYZ max;
   pcl::getMinMax3D(*input_cloud, min, max);
-
-  double center_radius_x = (max.x - min.x) * 0.5 * 0.3; //30%
-  double center_radius_y = (max.y - min.y) * 0.5 * 0.3; //30%
+  
+//  double center_radius_x = (max.x - min.x) * 0.5 * 0.3; //30%
+//  double center_radius_y = (max.y - min.y) * 0.5 * 0.3; //30%
+  double center_x = (min.x + max.x) / 2;
+  double center_y = (min.y + max.y) / 2;
+  double delta_x = (std::abs(min.x) + std::abs(min.x)) * 0.5 * 0.9;
+  double delta_y = (std::abs(min.y) + std::abs(min.y)) * 0.5 * 0.9;
+  
+  ROS_INFO("Plane min.x, max.x, min.y, max.y: %f, %f, %f, %f", min.x, max.x, min.y, max.y);
 
   pcl::PassThrough<pcl::PointXYZ> pass;
   pass.setInputCloud(input_cloud);
   pass.setFilterFieldName("x");
-  pass.setFilterLimits(-center_radius_x, center_radius_x);
+//  pass.setFilterLimits(-center_radius_x, center_radius_x);
+  pass.setFilterLimits(center_x - delta_x, center_x + delta_x);
   pass.filter(*temp_cloud);
 
   pass.setInputCloud(temp_cloud);
   pass.setFilterFieldName("y");
-  pass.setFilterLimits(-center_radius_y, center_radius_y);
+//  pass.setFilterLimits(-center_radius_y, center_radius_y);
+  pass.setFilterLimits(center_y - delta_y, center_y + delta_y);
   pass.filter(*center_cloud);
 
   return center_cloud;
@@ -48,7 +56,7 @@ boost::shared_ptr<pcl::ModelCoefficients> getPlane(pcl::PointCloud<pcl::PointXYZ
 
   segmentation.setOptimizeCoefficients(true);
   segmentation.setModelType(pcl::SACMODEL_PLANE);
-  segmentation.setMethodType(pcl::SAC_RANSAC);
+  segmentation.setMethodType(pcl::SAC_RRANSAC);
 
   segmentation.setDistanceThreshold(0.1); //we gotta catch'em all, so set that low
   segmentation.setMaxIterations(1000); //wanna be the very best, so set that high

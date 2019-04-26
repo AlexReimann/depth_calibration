@@ -127,8 +127,7 @@ cv::Mat calculate_plane(std::vector<float>& plane_coefficients, unsigned int hei
   cv::Mat x_index = make_column_index_matrix(height, width);
   cv::Mat y_index = make_column_index_matrix(width, height).t();
 
-//  ROS_INFO("plane coeff: %f, %f, %f, %f", plane_coefficients[0], plane_coefficients[1],
-//           plane_coefficients[2], plane_coefficients[3]);
+  ROS_INFO("plane coeff: %f, %f, %f, %f", plane_coefficients[0], plane_coefficients[1], plane_coefficients[2], plane_coefficients[3]);
 
   return (-1 * d) / (a * (x_index - center_x) * constant_x + b * (y_index - center_y) * constant_y + c * mm_to_m);
 }
